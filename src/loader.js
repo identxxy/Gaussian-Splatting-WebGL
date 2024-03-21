@@ -12,6 +12,11 @@ async function loadPly(content) {
     const match = header.match(regex)
     gaussianCount = parseInt(match[1])
 
+    // Get degree of SH
+    const regexSH = /(f_rest_\d+)\nproperty float opacity/
+    const matchSH = header.match(regexSH)
+    const shCount = parseInt(matchSH[1].split('f_rest_')[1]) + 1
+
     document.querySelector('#loading-text').textContent = `Success. Initializing ${gaussianCount} gaussians...`
 
     // Create arrays for gaussian properties
@@ -29,7 +34,8 @@ async function loadPly(content) {
 
     // Helpers
     const sigmoid = (m1) => 1 / (1 + Math.exp(-m1))
-    const NUM_PROPS = 62
+    // xyz + nxnynz + f_dc_012 + f_rest_n + opacity + scale_xyz + rot_0123
+    const NUM_PROPS = 9 + shCount + 8
 
     // Create a dataview to access the buffer's content on a byte levele
     const view = new DataView(content)
@@ -50,7 +56,7 @@ async function loadPly(content) {
         // const n = fromDataView(splatID, 3, 6) // Not used
         const harmonic = fromDataView(splatID, 6, 9)
         
-        const H_END = 6 + 48 // Offset of the last harmonic coefficient
+        const H_END = 9 + shCount // Offset of the last harmonic coefficient
         const opacity = fromDataView(splatID, H_END)
         const scale = fromDataView(splatID, H_END + 1, H_END + 4)
         const rotation = fromDataView(splatID, H_END + 4, H_END + 8)
