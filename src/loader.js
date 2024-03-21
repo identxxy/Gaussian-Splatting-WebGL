@@ -15,7 +15,12 @@ async function loadPly(content) {
     // Get degree of SH
     const regexSH = /(f_rest_\d+)\nproperty float opacity/
     const matchSH = header.match(regexSH)
-    const shCount = parseInt(matchSH[1].split('f_rest_')[1]) + 1
+    let shCount;
+    if (matchSH !== null) {
+        shCount = parseInt(matchSH[1].split('f_rest_')[1]) + 1;
+    } else {
+        shCount = 0;
+    }
 
     document.querySelector('#loading-text').textContent = `Success. Initializing ${gaussianCount} gaussians...`
 
